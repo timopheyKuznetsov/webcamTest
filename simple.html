@@ -16,8 +16,8 @@
     const { location: { protocol, host } } = window;
     if (protocol === 'https:') baseUrl = 'wss:';
     else baseUrl = 'ws:';
-    //return 'ws://@192.168.171.1:8321/ws';
-	return 'ws://@127.0.0.1:8321/ws';
+    return 'ws://@192.168.171.1:8321/ws';
+	//return 'ws://@127.0.0.1:8321/ws';
 	
 	//`${baseUrl}//${host}/ws`;
   };
