@@ -1,85 +1,69 @@
-<!doctype html><html lang="en"><body>
-<label for="interval">Time between images in seconds: </label>
-<input id="interval" type="text" value="1" min="1" pattern="\d+">
-<br>
-<button id="start">Start</button>
-<br>
-<label for="hideVid">Hide video element: </label>
-<input id="hideVid" type="checkbox">
-<video autoplay muted playsinline></video>
-<p>
-  Images captured: <span>0</span>
-</p>
-<br>
-<button id="stop" disabled>Stop & Show Images</button>
-<div id="images"></div>
+<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Luna Pass</title><style>body,
+    html {
+      padding: 0;
+      margin: 0;
+      font-family: sans-serif;
+    }
 
-<script>
-	const startBtn = document.querySelector("button#start");
-const stopBtn = document.querySelector("button#stop");
-const hideVid = document.querySelector("input#hideVid");
-const intervalSec = document.querySelector("input#interval");
-const videoElem = document.querySelector("video");
-const imageCountSpan = document.querySelector("span");
-const imagesDiv = document.querySelector("div#images");
-const storage = []; // Use this array as our database
-let stream, captureInterval;
+    ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
 
-hideVid.onclick = () => (videoElem.hidden = hideVid.checked);
-startBtn.onclick = async () => {
-  startBtn.disabled = true;
+    li {
+      padding: 1em;
+      border-bottom: 1px solid #CACCCF;
+    }
 
-  stream = await navigator.mediaDevices.getUserMedia({ video: true });
-  videoElem.onplaying = () =>
-    console.log("video playing stream:", videoElem.srcObject);
-  videoElem.srcObject = stream;
+    li {
+      color: #52575C;
+      text-decoration: none;
+      transition: 0.3s color, 0.3s background-color;
+      cursor: pointer;
+    }
 
-  const canvas = document.createElement("canvas");
-  const ctx = canvas.getContext("2d");
+    li:hover,
+    li.active {
+      color: #FFFFFF;
+      background-color: #007EFF;
+      text-decoration: none;
+    }
 
-  // (data check on the interval value) * that value is in seconds  * frame timestamps are in microseconds
-  const interval =
-    (parseInt(intervalSec.value) >= 1 ? intervalSec.value * 1 : 1) * 1000;
-  captureInterval = setInterval(async () => {
-    // I am not assuming the source video has fixed dimensions
-    canvas.height = videoElem.videoHeight;
-    canvas.width = videoElem.videoWidth;
-    ctx.drawImage(videoElem, 0, 0);
-    // happens with the first image in Firefox; should wrap this in a videoElem.onplay
-    canvas.toBlob((blob) => {
-      if (blob === null) {
-        console.log("Failed to convert canvas to blob");
-        return;
+    #grid {
+      display: flex;
+    }
+
+    #sidebar {
+      width: 250px;
+      border-right: 1px solid #CACCCF;
+      height: 100vh;
+    }
+
+    #content {
+      flex: 1;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      display: block;
+      border: 0;
+    }</style><script>document.addEventListener('DOMContentLoaded', function () {
+      const content = document.getElementById('content');
+      const links = document.getElementsByTagName('li');
+      for (let i = 0; i < links.length; i++) {
+        const link = links[i];
+        link.addEventListener('click', (e) => {
+          const el = e.target;
+          const contentLink = el.getAttribute('data-content');
+          content.innerHTML = '';
+          const iframe = document.createElement('iframe');
+          iframe.setAttribute('src', contentLink);
+          content.appendChild(iframe);
+          for (let i = 0; i < links.length; i++) links[i].className = '';
+          el.className = 'active';
+        })
       }
-      console.log(blob);
-      storage.push(blob);
-      imageCountSpan.innerText++;
-    });
-  }, interval);
-
-  stopBtn.disabled = false;
-};
-
-stopBtn.onclick = () => {
-  // stop capture
-  clearInterval(captureInterval);
-
-  // close the camera
-  stream.getTracks().forEach((track) => track.stop());
-
-  // Display each image
-  function showImages() {
-    const blob = storage.shift();
-    const imageUrl = window.URL.createObjectURL(blob);
-    const imgElem = new Image();
-    imgElem.src = imageUrl;
-    imagesDiv.appendChild(imgElem);
-
-    if (storage.length > 0) showImages();
-  }
-
-  console.log("stored images");
-  showImages();
-};
-</script>
-</body></html>
+    });</script>
+</head><body><div id="grid"><div id="sidebar"><ul><li data-content="simple.html">LunaPass</li><li data-content="lp-message-renderer.html">LunaPass + LPMessageRenderer</li><li data-content="lp-face-estimator.html">LunaPass + LPFaceEstimator</li><li data-content="playground.html">Playground</li></ul></div><div id="content"></div></div></body></html>
