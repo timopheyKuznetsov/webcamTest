@@ -1,69 +1,51 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Luna Pass</title><style>body,
-    html {
-      padding: 0;
-      margin: 0;
-      font-family: sans-serif;
-    }
-
-    ul {
-      margin: 0;
-      padding: 0;
-      list-style: none;
-    }
-
-    li {
-      padding: 1em;
-      border-bottom: 1px solid #CACCCF;
-    }
-
-    li {
-      color: #52575C;
-      text-decoration: none;
-      transition: 0.3s color, 0.3s background-color;
-      cursor: pointer;
-    }
-
-    li:hover,
-    li.active {
-      color: #FFFFFF;
-      background-color: #007EFF;
-      text-decoration: none;
-    }
-
-    #grid {
-      display: flex;
-    }
-
-    #sidebar {
-      width: 250px;
-      border-right: 1px solid #CACCCF;
+<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>LunaPass</title><style>body {
+      width: 100vw;
       height: 100vh;
+      position: relative;
+      margin: 0;
+      padding: 0;
     }
 
-    #content {
-      flex: 1;
+    #vllunapass {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translateX(-50%) translateY(-50%);
+    }</style></head><body><div id="vllunapass"></div><script src="LunaPass.1.4.0.js"></script></body><script>const buildConnectionString = () => {
+    let baseUrl;
+    const { location: { protocol, host } } = window;
+    //else baseUrl = 'ws:';
+    	return 'wss://user:user@192.168.171.1:8321/ws';
+		//return 'ws://@192.168.171.1:8321/ws';
+		
+	//return 'ws://@127.0.0.1:8321/ws';
+	
+	//`${baseUrl}//${host}/ws`;
+  };
+
+  async function main() {
+    const rootNode = document.getElementById('vllunapass');
+    const connectionString = buildConnectionString();
+
+    // Создание компонентов
+    const lunapass = new LunaPass(rootNode);
+
+    // Инициализация компонентов
+    //await lunapass.connectWS(connectionString);
+    await lunapass.attachCamera();
+
+
+    // Проверить Liveness автоматически
+    // В результате проверки возвращается ответ сервера с результирующим JWT сообщением
+    const result = await lunapass.checkLiveness();
+    if (result.isOk) {
+      alert('Liveness успешно пройден, результат в console')
+      console.log(result);
     }
 
-    iframe {
-      width: 100%;
-      height: 100%;
-      display: block;
-      border: 0;
-    }</style><script>document.addEventListener('DOMContentLoaded', function () {
-      const content = document.getElementById('content');
-      const links = document.getElementsByTagName('li');
-      for (let i = 0; i < links.length; i++) {
-        const link = links[i];
-        link.addEventListener('click', (e) => {
-          const el = e.target;
-          const contentLink = el.getAttribute('data-content');
-          content.innerHTML = '';
-          const iframe = document.createElement('iframe');
-          iframe.setAttribute('src', contentLink);
-          content.appendChild(iframe);
-          for (let i = 0; i < links.length; i++) links[i].className = '';
-          el.className = 'active';
-        })
-      }
-    });</script>
-</head><body><div id="grid"><div id="sidebar"><ul><li data-content="simple.html">LunaPass</li><li data-content="lp-message-renderer.html">LunaPass + LPMessageRenderer</li><li data-content="lp-face-estimator.html">LunaPass + LPFaceEstimator</li><li data-content="playground.html">Playground</li></ul></div><div id="content"></div></div></body></html>
+    // Деинициализация компонента
+    await lunapass.disconnectWS();
+    await lunapass.detachCamera();
+  }
+
+  document.addEventListener('DOMContentLoaded', main);</script></html>
