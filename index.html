@@ -1,51 +1,83 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>LunaPass</title><style>body {
-      width: 100vw;
-      height: 100vh;
-      position: relative;
-      margin: 0;
-      padding: 0;
-    }
-
-    #vllunapass {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translateX(-50%) translateY(-50%);
-    }</style></head><body><div id="vllunapass"></div><script src="LunaPass.1.4.0.js"></script></body><script>const buildConnectionString = () => {
-    let baseUrl;
-    const { location: { protocol, host } } = window;
-    //else baseUrl = 'ws:';
-    	return 'wss://user:user@192.168.171.1:8321/ws';
-		//return 'ws://@192.168.171.1:8321/ws';
-		
-	//return 'ws://@127.0.0.1:8321/ws';
+<!DOCTYPE HTML>
+<html>
+	<head>
+	<meta name="viewport" content="width=320; user-scalable=no" />
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+	<title>ColorThief Demo</title>
 	
-	//`${baseUrl}//${host}/ws`;
-  };
+	<script type="text/javascript" charset="utf-8" src="jquery-2.0.0.min.js"></script>
+	<script type="text/javascript" charset="utf-8" src="quantize.js"></script>
+	<script type="text/javascript" charset="utf-8" src="color-thief.js"></script>
+        
+	<style>
+	#yourimage {
+		width:100%;	
+	}
+	
+	#swatches {
+		width: 100%;
+		height: 50px;	
+	}
 
-  async function main() {
-    const rootNode = document.getElementById('vllunapass');
-    const connectionString = buildConnectionString();
+	.swatch {
+		width:18%;
+		height: 50px;
+		border-style:solid;
+		border-width:thin;	
+		float: left;
+		margin-right: 3px;	
+	}
+	</style>
+	</head>
 
-    // Создание компонентов
-    const lunapass = new LunaPass(rootNode);
+	<body>
 
-    // Инициализация компонентов
-    //await lunapass.connectWS(connectionString);
-    await lunapass.attachCamera();
+		<input type="file" capture="camera" accept="image/*" id="takePictureField">
+        
+		<img id="yourimage">
 
+		<div id="swatches">
+			<div id="swatch0" class="swatch"></div>
+			<div id="swatch1" class="swatch"></div>
+			<div id="swatch2" class="swatch"></div>
+			<div id="swatch3" class="swatch"></div>
+			<div id="swatch4" class="swatch"></div>
+		</div>
+		
+    <script>
+	var desiredWidth;
 
-    // Проверить Liveness автоматически
-    // В результате проверки возвращается ответ сервера с результирующим JWT сообщением
-    const result = await lunapass.checkLiveness();
-    if (result.isOk) {
-      alert('Liveness успешно пройден, результат в console')
-      console.log(result);
-    }
+    $(document).ready(function() {
+        console.log('onReady');
+		$("#takePictureField").on("change",gotPic);
+		$("#yourimage").load(getSwatches);
+		desiredWidth = window.innerWidth;
+        
+        if(!("url" in window) && ("webkitURL" in window)) {
+            window.URL = window.webkitURL;   
+        }
+		
+	});
 
-    // Деинициализация компонента
-    await lunapass.disconnectWS();
-    await lunapass.detachCamera();
-  }
+	function getSwatches(){
+		var colorArr = createPalette($("#yourimage"), 5);
+		for (var i = 0; i < Math.min(5, colorArr.length); i++) {
+			$("#swatch"+i).css("background-color","rgb("+colorArr[i][0]+","+colorArr[i][1]+","+colorArr[i][2]+")");
+			console.log($("#swatch"+i).css("background-color"));
+		}
+	}	
+	
+    //Credit: https://www.youtube.com/watch?v=EPYnGFEcis4&feature=youtube_gdata_player
+	function gotPic(event) {
+        if(event.target.files.length == 1 && 
+           event.target.files[0].type.indexOf("image/") == 0) {
+            $("#yourimage").attr("src",URL.createObjectURL(event.target.files[0]));
+        }
+	}
+	
+	
+        
+    </script>    
+	</body>
 
-  document.addEventListener('DOMContentLoaded', main);</script></html>
+</html>
