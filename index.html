@@ -3,7 +3,10 @@
 	<head>
 	</head>
 	<body>
-		<video id="player"></video>
+video::-webkit-media-controls-start-playback-button {
+    display: none;
+}
+<video id="player" autoplay="autoplay"></video>
 <button id="capture">Capture</button>
 <canvas id="canvas" width="320" height="240"></canvas>
 <script>
