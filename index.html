@@ -22,6 +22,8 @@
   });
 
   // Attach the video stream to the video element and autoplay.
+  player.controls = false;	
+  player.play();	
   navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
     player.srcObject = stream;
   });
