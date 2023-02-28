@@ -21,9 +21,7 @@
     context.drawImage(player, 0, 0, canvas.width, canvas.height);
   });
 
-  // Attach the video stream to the video element and autoplay.
-  player.controls = false;	
-  player.play();	
+  // Attach the video stream to the video element and autoplay	
   navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
     player.srcObject = stream;
   });
