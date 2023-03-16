@@ -178,6 +178,7 @@
 </div>
 <div id="page4">
 	<input id="inputFIO" type="text">
+	<p>version 1.0.2</p>
 </div>
 <button id="capture">Capture</button>
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
@@ -204,12 +205,10 @@
 		video: true,
 	};	
 	var processStarted = false;
+	var currentStream;
 	
 
-	// Attach the video stream to the video element and autoplay
-	navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
-	player.srcObject = stream;
-	});
+	
 	captureButton.addEventListener('click', () => {
 		// Draw the video frame to the canvas.
 		checkLiveness();
@@ -218,8 +217,13 @@
         setInterval(checkLiveness, 100)
 	document.getElementById("identificate").onclick = async function () {
         try {
-	  processStarted = true;
-          isIdentificate = true;
+		// Attach the video stream to the video element and autoplay
+		navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
+			currentStream = stream;
+			player.srcObject = stream;
+		});
+	  	processStarted = true;
+        isIdentificate = true;
 //          setInterval(checkLiveness, 100)
         } catch (error) {
           console.error(error);
@@ -228,8 +232,13 @@
       };
       document.getElementById("register").onclick = async function () {
         try {
-	  processStarted = true;
-          isIdentificate = false;
+			// Attach the video stream to the video element and autoplay
+		navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
+			currentStream = stream;
+			player.srcObject = stream;
+		});
+	  	processStarted = true;
+        isIdentificate = false;
         } catch (error) {
           console.error(error);
  	  document.getElementById('status').innerHTML = 'Невозможно проверить лайфнесс';
@@ -437,6 +446,9 @@
                 requestMatcherFaces(attributeId, externalId, result.face_id);
               } else{
 		document.getElementById('status').innerHTML = document.getElementById("inputFIO").value + ' зарегистрирован!';
+		currentStream.getTracks().forEach(function(track) {
+  					track.stop();
+				});
                 //alert(document.getElementById("inputFIO").value + ' зарегистрирован!');
               }
           }
@@ -498,6 +510,9 @@
 	    	if(isIdentificate){
             		document.getElementById("inputFIO").value = result[0].matches[0].result[0].face.user_data;
 	    		document.getElementById('status').innerHTML = result[0].matches[0].result[0].face.user_data;
+				currentStream.getTracks().forEach(function(track) {
+  					track.stop();
+				});
             		//alert(result[0].matches[0].result[0].face.user_data);
 		} else{
 			let isExecuted = confirm("Пользователь " + result[0].matches[0].result[0].face.user_data + " уже существует. Перезаписать?");
