@@ -26,12 +26,14 @@
 	z-index: 10;
 }
 #page{
+	display: none;
 	position: relative;
 	height: 1300px;
 	width: 100%;
 	margin-top: 20px;
 }
 #page2{
+        margin-top: 20%;
 	position: relative;
 	align: center;
 	display: flex;
@@ -49,6 +51,16 @@
 
 #status{
 	position:absolute;
+	margin-top: 10%;
+	text-align: center;
+	font-size: 60px;
+	width: 100%;
+	color: blue;
+	z-index: 1000;
+}
+
+#statusDiv{
+	position:relative;
 	margin-top: 10%;
 	text-align: center;
 	font-size: 60px;
@@ -162,23 +174,26 @@
   box-shadow: rgba(50, 50, 93, .1) 0 0 0 1px inset, rgba(50, 50, 93, .2) 0 6px 15px 0, rgba(0, 0, 0, .1) 0 2px 2px 0, rgba(50, 151, 211, .3) 0 0 0 4px;
 }
 
+.effect-8 {border: 1px solid #ccc; padding: 7px 14px 9px; transition: 0.4s;}
 
 </style>
 </head>
 <body>
+<div id="statusDiv">
+<p id="status2">Выберите действие</p>
+</div>
 <div id="page">
-<p id="status">Выберите действие</p>
+<p id="status"></p>
 <video id="player" playsinline muted autoplay></video>
 <canvas id="canvas" width="480" height="640"></canvas>
 <canvas id="canvas2"></canvas>
 </div>
+<div id="page4">
+	<input class="effect-8" placeholder="Введите ФИО" id="inputFIO" type="text">
+</div>
 <div id="page2">
 	<button class="button-9" role="button" id="identificate">Идентификация</button>
 	<button class="button-9" role="button" id="register" >Регистрация</button>
-</div>
-<div id="page4">
-	<input id="inputFIO" type="text">
-	<p>version 1.0.2</p>
 </div>
 <button id="capture">Capture</button>
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
@@ -222,6 +237,7 @@
 			currentStream = stream;
 			player.srcObject = stream;
 		});
+		setVisible(true);
 	  	processStarted = true;
         isIdentificate = true;
 //          setInterval(checkLiveness, 100)
@@ -237,11 +253,12 @@
 			currentStream = stream;
 			player.srcObject = stream;
 		});
+		setVisible(true);
 	  	processStarted = true;
         isIdentificate = false;
         } catch (error) {
           console.error(error);
- 	  document.getElementById('status').innerHTML = 'Невозможно проверить лайфнесс';
+ 	  document.getElementById('status2').innerHTML = 'Невозможно проверить лайфнесс';
           alert("Невозможно проверить лайфнесс:\n" + error.message);
         }
 
@@ -365,7 +382,8 @@
         })
         .catch((error) => {
 		console.log("error", error);
-		document.getElementById('status').innerHTML = 'Ошибка идентификации';
+		document.getElementById('status2').innerHTML = 'Ошибка идентификации';
+		setVisible(false);
 	}
 	);
 
@@ -400,7 +418,8 @@
           )
           .catch(error => {
 		console.log('error', error)
-		document.getElementById('status').innerHTML = 'Ошибка идентификации';
+		document.getElementById('status2').innerHTML = 'Ошибка идентификации';
+		setVisible(false);
 		}
 );
     }
@@ -445,17 +464,19 @@
               if(identificate) {
                 requestMatcherFaces(attributeId, externalId, result.face_id);
               } else{
-		document.getElementById('status').innerHTML = document.getElementById("inputFIO").value + ' зарегистрирован!';
+		document.getElementById('status2').innerHTML = document.getElementById("inputFIO").value + ' зарегистрирован!';
 		currentStream.getTracks().forEach(function(track) {
   					track.stop();
 				});
+		setVisible(false);
                 //alert(document.getElementById("inputFIO").value + ' зарегистрирован!');
               }
           }
         )
           .catch(error => {
 		console.log('error', error)
-		document.getElementById('status').innerHTML = 'Ошибка идентификации';
+		document.getElementById('status2').innerHTML = 'Ошибка идентификации';
+		setVisible(false);
 	}
 	);
    }
@@ -509,10 +530,11 @@
 		let face__id = result[0].matches[0].result[0].face.face_id;
 	    	if(isIdentificate){
             		document.getElementById("inputFIO").value = result[0].matches[0].result[0].face.user_data;
-	    		document.getElementById('status').innerHTML = result[0].matches[0].result[0].face.user_data;
+	    		document.getElementById('status2').innerHTML = 'Пользователь найден!\n' + result[0].matches[0].result[0].face.user_data;
 				currentStream.getTracks().forEach(function(track) {
   					track.stop();
 				});
+			setVisible(false);
             		//alert(result[0].matches[0].result[0].face.user_data);
 		} else{
 			let isExecuted = confirm("Пользователь " + result[0].matches[0].result[0].face.user_data + " уже существует. Перезаписать?");
@@ -523,8 +545,8 @@
 	    } catch (error) {
 		if(isIdentificate){
 	          	console.error(error);
-			document.getElementById('status').innerHTML = 'Ошибка идентификации';
-          		alert("Ошибка идентификации");
+			document.getElementById('status2').innerHTML = 'Ошибка идентификации';
+			setVisible(false);
 		} else{
 			requestFaces(attributeId, sampleId, false);
 		}
@@ -533,7 +555,8 @@
           })
           .catch(error => {
 		console.log('error', error)
-		document.getElementById('status').innerHTML = 'Ошибка идентификации';
+		document.getElementById('status2').innerHTML = 'Ошибка идентификации';
+		setVisible(false);
 	}
 	);
    }
@@ -561,8 +584,9 @@
 		})
   		.catch(error => {
 			console.log('error', error)
-			document.getElementById('status').innerHTML = 'Ошибка идентификации';
+			document.getElementById('status2').innerHTML = 'Ошибка идентификации';
 			processStarted = true;
+			setVisible(false);
 		}
 		);
 	}
@@ -594,6 +618,23 @@
 			requestFaces(attributeId, sampleId, false);
 		   })
 		  .catch(error => console.log('error', error));
+	}
+	function setVisible(visible) {
+		var statusDiv = document.getElementById("statusDiv");
+		var page = document.getElementById("page");
+		var page2 = document.getElementById("page2");
+		var page4 = document.getElementById("page4");
+		if(visible) {
+			page.style.display = "block";
+			statusDiv.style.display = "none";
+			page2.style.display = "none";
+			page4.style.display = "none" ;
+		} else {
+			page.style.display = "none" ;
+			statusDiv.style.display = "block";
+			page2.style.display = "block" ;
+			page4.style.display = "block" ;
+		} 
 	}
 </script>
 </body>
